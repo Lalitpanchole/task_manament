@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --border: #e2e8f0;
+    --input: #f1f5f9;
+    --ring: #94a3b8;
+    --sidebar-bg: #f8fafc;
+    --sidebar-fg: #334155;
+    --sidebar-border: #e2e8f0;
+    
+    /* Dynamic Color Mode Accent Defaults */
+    --accent-primary: #18181b;
+    --accent-hover: #09090b;
+    --accent-light-bg: rgba(24, 24, 27, 0.08);
+    --accent-text: #18181b;
+  }
+
+  .dark {
+    --background: #090d16;
+    --foreground: #f8fafc;
+    --card: #111827;
+    --card-foreground: #f8fafc;
+    --border: #1f2937;
+    --input: #1e293b;
+    --ring: #475569;
+    --sidebar-bg: #0d1322;
+    --sidebar-fg: #94a3b8;
+    --sidebar-border: #1e293b;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Accent Color Utilities */
+.btn-primary {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.accent-bg-soft {
+  background-color: var(--accent-light-bg);
+}
+
+.accent-text {
+  color: var(--accent-text);
+}
+
+.accent-border {
+  border-color: var(--accent-primary);
+}
+
+.accent-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-primary);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
