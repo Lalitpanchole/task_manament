@@ -1,0 +1,195 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TaskStatus {
+  TODO      @map("To Do")
+  DOING     @map("Doing")
+  COMPLETED @map("Completed")
+  ON_HOLD   @map("On Hold")
+}
+
+enum TaskPriority {
+  NO_PRIORITY @map("No Priority")
+  URGENT      @map("Urgent")
+  HIGH        @map("High")
+  MEDIUM      @map("Medium")
+  LOW         @map("Low")
+}
+
+enum ProjectStatus {
+  Active
+  Completed
+  On_Hold   @map("On Hold")
+  Archived
+}
+
+enum UserType {
+  guest
+  google
+  regular
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  username     String?       @unique
+  title        String?
+  avatar       String?       @db.Text
+  role         String?
+  userType     UserType      @default(guest)
+  password     String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  ledProjects  Project[]     @relation("ProjectLead")
+  assignedTasks TaskMember[]
+  reportedTasks Task[]        @relation("TaskReporter")
+  subtasks     Subtask[]     @relation("SubtaskMember")
+  comments     Comment[]
+  activityLogs ActivityLog[]
+  userSettings UserSettings?
+
+  @@map("users")
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  description String?       @db.Text
+  priority    TaskPriority  @default(MEDIUM)
+  status      ProjectStatus @default(Active)
+  dueDate     String?
+  leadId      String
+  lead        User          @relation("ProjectLead", fields: [leadId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  tasks       Task[]
+
+  @@map("projects")
+}
+
+model Task {
+  id          String        @id @default(uuid())
+  title       String
+  description String?       @db.Text
+  status      TaskStatus    @default(TODO)
+  priority    TaskPriority  @default(MEDIUM)
+  startDate   String?
+  dueDate     String?
+  projectId   String?
+  project     Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  reporterId  String?
+  reporter    User?         @relation("TaskReporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  subtasks    Subtask[]
+  comments    Comment[]
+  resources   Resource[]
+  labels      TaskLabel[]
+  members     TaskMember[]
+  updates     ActivityLog[]
+
+  @@map("tasks")
+}
+
+model Subtask {
+  id        String       @id @default(uuid())
+  taskId    String
+  task      Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  title     String
+  completed Boolean      @default(false)
+  priority  TaskPriority @default(MEDIUM)
+  memberId  String?
+  member    User?        @relation("SubtaskMember", fields: [memberId], references: [id], onDelete: SetNull)
+  dueDate   String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("subtasks")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("comments")
+}
+
+model Resource {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  title     String
+  url       String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("resources")
+}
+
+model Label {
+  id        String      @id @default(uuid())
+  name      String      @unique
+  createdAt DateTime    @default(now())
+
+  tasks     TaskLabel[]
+
+  @@map("labels")
+}
+
+model TaskLabel {
+  taskId  String
+  labelId String
+  task    Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label   Label  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+  @@map("task_labels")
+}
+
+model TaskMember {
+  taskId String
+  userId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+  @@map("task_members")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  text      String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+model UserSettings {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fieldPreferences Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("user_settings")
+}

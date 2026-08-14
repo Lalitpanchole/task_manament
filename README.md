@@ -1,285 +1,222 @@
-# AbleSpace Task Management System
+# AbleSpace Task Management System (Full Stack Assessment)
 
-A modern, responsive, and fully interactive Task Management System frontend developed for the **AbleSpace Technical Assessment**. Built strictly based on the provided 14 Figma screenshots, this application delivers a complete client-side workflow including guest authentication, Kanban board & grouped list views, real-time search, interactive task details, project management, dynamic field visibility, calendar date selection, theme switching, and accent color customization.
+A modern, responsive, and complete Full Stack Task Management System developed for the **AbleSpace Technical Assessment**. Built strictly based on the provided 14 Figma reference screens, this application delivers an end-to-end task management experience powered by a **NestJS REST API backend**, **MySQL database (via XAMPP)** with **Prisma ORM**, **JWT Authentication**, **Swagger OpenAPI Documentation**, and a **Next.js App Router frontend**.
 
 ---
 
-## 1. Project Overview
+## 1. System Architecture
 
-- **Figma Fidelity**: Designed and structured strictly following the 14 reference screens provided for the AbleSpace technical assessment.
-- **Frontend Architecture**: Built using Next.js (App Router), TypeScript, and Tailwind CSS.
-- **Interactive Workflow**: Features real-time state management for task CRUD, status shifts, priority updates, subtask lists, comments, and activity audit timeline logs.
-- **Local Persistence**: All user preferences, auth sessions, task updates, project data, theme settings, and accent color modes persist in the browser using `localStorage`.
-- **Frontend Only**: This phase focuses exclusively on the frontend application user experience. No backend API or database connection is included in this phase.
+```
++------------------------------------+          REST APIs           +----------------------------------+
+|   Next.js Frontend (App Router)    |  <=======================>   |   NestJS Backend Service (Port 4000)|
+|   - React 19 / TypeScript          |   Headers: Bearer <JWT>     |   - Auth & Passport JWT Guards       |
+|   - Tailwind CSS                   |                              |   - DTO Validation Pipes             |
+|   - React Context API Layer        |                              |   - Controllers & Services           |
+|   - Figma 14 Screens (100% Fidelity)|                              |   - Swagger OpenAPI Docs (/api/docs) |
++------------------------------------+                              +----------------------------------+
+                                                                                     |
+                                                                              Prisma ORM Client
+                                                                                     |
+                                                                                     v
+                                                                        +--------------------------+
+                                                                        |   MySQL DB (via XAMPP)   |
+                                                                        |   Database: ablespace_db |
+                                                                        |   (Tables & FK Relations)|
+                                                                        +--------------------------+
+```
 
 ---
 
 ## 2. Tech Stack
 
+### Backend
+- **Framework**: NestJS 10
+- **Language**: TypeScript
+- **Database**: MySQL (running via XAMPP)
+- **ORM**: Prisma ORM 5
+- **Authentication**: JWT (`@nestjs/jwt`, `@nestjs/passport`, `passport-jwt`)
+- **API Specification**: Swagger / OpenAPI 7 (`/api/docs`)
+- **Validation**: `class-validator`, `class-transformer`
+- **Testing**: Jest unit tests
+
+### Frontend
 - **Framework**: Next.js 16 (App Router)
 - **UI Library**: React 19
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS 4
 - **Icons**: Lucide React
 - **State Management**: React Context (`AuthContext`, `TaskContext`, `ThemeContext`)
-- **Storage**: Browser `localStorage`
-- **Utilities**: `clsx`, `tailwind-merge`
+- **API Client**: Service layer wrapper (`src/lib/api.ts`)
 
 ---
 
-## 3. Features
+## 3. Database Schema & Entities
 
-### Authentication & Guest Entry
-- **Guest Login**: Instantly creates a frontend-only guest session and redirects to workspace tasks.
-- **Simulated Google Login**: Simulates OAuth authentication flow and populates user session data.
-- **Persistent Session**: Automatically retains logged-in session across page refreshes.
+The relational MySQL database schema strictly models all entities required by the application:
 
-### Task Management
-- **Kanban Board View**: Column-based layout (**To Do**, **Doing**, **Completed**, **On Hold**) with inline `+ Add Task` triggers.
-- **Grouped List View**: Status-grouped task table with row actions menu (`...`) and group collapse toggles.
-- **Task CRUD**: Create, edit inline, cycle status, change priority, and delete tasks.
-- **Fields Visibility Menu**: Dynamic toggle menu to show/hide table columns (**Priority**, **Members**, **Due Date**, **Labels**, **Status**, **Reporter**).
-- **Real-Time Search**: Live search input filtering task titles across both Board and List views with keyboard shortcut indicator (`⌘F`).
-
-### Task Details Drawer & Calendar
-- **Editable Content**: Title and description inline editing, property tags, and clickable resource attachments (`+ Add document or link...`).
-- **Subtasks Table**: Add, edit priority/member, toggle completion with strikethrough styling, and delete subtasks.
-- **Comments & Activity Stream**: Comment input feed with author avatars + automatically appended audit timeline log entries when status, priority, or due dates change.
-- **Interactive Calendar Popover**: Interactive month grid (**January 2026**) supporting start/end date selection and day highlighting.
-
-### Projects Management
-- **Projects Table**: Displays project name, priority badge, lead avatar/name, due date, and actions menu.
-- **Multi-Level Nested Filter Menu**: Filter categories (**Status**, **Priority** nested options, **Members**, **Due Date**, **Teams**, **Labels**, **Reporter**) that filter table rows live.
-- **Project Task Context**: Route `/projects/[id]` with breadcrumb navigation (`Projects > Project Name`) displaying project-assigned tasks.
-
-### Profile & Workspace Management
-- **Profile Settings**: Edit profile picture URL, email, full name, title/role, and username.
-- **Leave Workspace**: Workspace access section with destructive confirmation modal that clears session data and redirects to login.
-
-### Theme & Customization Engine
-- **Light & Dark Mode**: Seamless theme switching with persistent `.dark` root styling.
-- **6 Accent Color Modes**: Palettes for **Amber**, **Blue**, **Pink**, **Rose**, **Emerald**, and **Black** applied dynamically to buttons, badges, active tabs, and focus rings.
-
-### Local Persistence
-The application persists the following in `localStorage`:
-- User authentication session
-- Task data and activity logs
-- Project records
-- Theme preference (Light / Dark)
-- Accent color selection
-- Field visibility preferences
+- **`User`**: `id`, `name`, `email`, `username`, `title`, `avatar`, `role`, `userType` ('guest'|'google'|'regular'), `createdAt`, `updatedAt`
+- **`Project`**: `id`, `name`, `description`, `priority`, `status`, `dueDate`, `leadId` (FK -> User), `createdAt`, `updatedAt`
+- **`Task`**: `id`, `projectId` (FK -> Project), `reporterId` (FK -> User), `title`, `description`, `status`, `priority`, `startDate`, `dueDate`, `createdAt`, `updatedAt`
+- **`Subtask`**: `id`, `taskId` (FK -> Task), `memberId` (FK -> User), `title`, `completed`, `priority`, `dueDate`, `createdAt`, `updatedAt`
+- **`Comment`**: `id`, `taskId` (FK -> Task), `userId` (FK -> User), `content`, `createdAt`, `updatedAt`
+- **`Resource`**: `id`, `taskId` (FK -> Task), `title`, `url`, `createdAt`
+- **`Label`**: `id`, `name`
+- **`TaskLabel`**: `taskId`, `labelId` (Many-to-Many join table)
+- **`TaskMember`**: `taskId`, `userId` (Many-to-Many join table)
+- **`ActivityLog`**: `id`, `taskId` (FK -> Task), `userId` (FK -> User), `text`, `createdAt`
+- **`UserSettings`**: `id`, `userId` (FK -> User), `fieldPreferences` (JSON)
 
 ---
 
-## 4. Application Routes
+## 4. REST API Endpoints
 
-| Route | Description |
-| :--- | :--- |
-| `/login` | Entry page with Pyramid branding, **Continue as Guest**, and **Login with Google** options. |
-| `/tasks` | Main workspace dashboard featuring Kanban Board, List View, Search, and Fields controls. |
-| `/tasks/[id]` | Dedicated Task Details page with task properties, subtasks, comments, calendar, and audit feed. |
-| `/projects` | Projects list page with multi-level nested filter menu and project creation modal. |
-| `/projects/[id]` | Project detail page displaying breadcrumb context (`Projects > Project Name`) and project tasks. |
-| `/settings/profile` | Profile settings page to update user information and handle workspace logout. |
+### Health
+- `GET /api/health` - Check NestJS server and MySQL database connectivity status.
+
+### Authentication
+- `POST /api/auth/guest` - Authenticate or create Guest session & issue JWT.
+- `POST /api/auth/google` - Simulated Google OAuth authentication & issue JWT.
+- `GET /api/auth/me` - Get current authenticated user profile.
+- `POST /api/auth/logout` - Invalidate current session token.
+
+### Users / Profile
+- `GET /api/users` - List all workspace users/members.
+- `GET /api/users/me` - Get profile details of logged in user.
+- `GET /api/users/:id` - Get user details by ID.
+- `PATCH /api/users/me` - Update profile of logged in user.
+
+### Tasks
+- `GET /api/tasks` - List & filter tasks (query params: `search`, `status`, `priority`, `projectId`, `dueDate`, `memberId`, `labelId`).
+- `GET /api/tasks/:id` - Get task details with subtasks, comments, resources, members, and activity stream.
+- `POST /api/tasks` - Create a new task.
+- `PATCH /api/tasks/:id` - Update task status, priority, title, dates, or project relation.
+- `DELETE /api/tasks/:id` - Delete a task.
+- `POST /api/tasks/:id/members` - Toggle member assignment.
+- `POST /api/tasks/:id/labels` - Toggle label tag.
+- `POST /api/tasks/:id/resources` - Add document link / resource.
+
+### Subtasks
+- `GET /api/tasks/:taskId/subtasks` - List subtasks for task.
+- `POST /api/tasks/:taskId/subtasks` - Create subtask.
+- `PATCH /api/subtasks/:id` - Update subtask details or completion state.
+- `DELETE /api/subtasks/:id` - Delete subtask.
+
+### Comments
+- `GET /api/tasks/:taskId/comments` - List comments on task.
+- `POST /api/tasks/:taskId/comments` - Post comment on task.
+- `DELETE /api/comments/:id` - Delete comment.
+
+### Activity History
+- `GET /api/tasks/:taskId/activity` - Get task audit activity timeline logs.
+
+### Projects
+- `GET /api/projects` - List workspace projects with task counts.
+- `GET /api/projects/:id` - Get project details.
+- `POST /api/projects` - Create project.
+- `PATCH /api/projects/:id` - Update project.
+- `DELETE /api/projects/:id` - Delete project.
+- `GET /api/projects/:id/tasks` - Get tasks assigned to specific project.
+
+### Labels & Settings
+- `GET /api/labels`, `POST /api/labels`, `PATCH /api/labels/:id`, `DELETE /api/labels/:id`
+- `GET /api/settings`, `PATCH /api/settings`
 
 ---
 
-## 5. Project Structure
-
-```
-d:/My Projects/FigmaProject/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx              # Root layout wrapping Auth, Theme & Task Providers
-│   │   ├── page.tsx                # Auth redirect guard
-│   │   ├── globals.css             # CSS variables & accent color token setup
-│   │   ├── login/page.tsx          # Guest & Google login screen
-│   │   ├── tasks/page.tsx          # Board & List task views page
-│   │   ├── tasks/[id]/page.tsx     # Dedicated task details page
-│   │   ├── projects/page.tsx       # Projects table page
-│   │   ├── projects/[id]/page.tsx  # Project task detail view
-│   │   └── settings/profile/page.tsx # Profile settings page
-│   ├── components/
-│   │   ├── auth/                   # LoginForm component
-│   │   ├── layout/                 # AppShell, Sidebar & Header components
-│   │   ├── tasks/                  # TaskBoardView, TaskListView, TaskCard, TaskDetailsModal, TaskModal, FieldsDropdown, DatePickerPopover
-│   │   ├── projects/               # ProjectListView, ProjectFilterMenu, ProjectModal
-│   │   ├── profile/                # ProfileMenu & ProfileSettingsForm
-│   │   ├── theme/                  # ThemeProvider & ColorMode setup
-│   │   └── ui/                     # Avatar, Badge, Modal primitives
-│   ├── context/
-│   │   ├── AuthContext.tsx         # Guest & Google session state
-│   │   ├── TaskContext.tsx         # Central state for Tasks, Projects, Fields & Filters
-│   │   └── ThemeContext.tsx        # Light/Dark mode & 6 Accent colors state
-│   ├── lib/
-│   │   ├── initialData.ts          # Mock dataset matching Figma screenshots
-│   │   ├── storage.ts              # LocalStorage helper functions
-│   │   └── utils.ts                # Class merge (cn) and date formatting helpers
-│   └── types/                      # TypeScript definitions (user, task, project, theme)
-└── package.json
-```
-
----
-
-## 6. Getting Started
+## 5. Getting Started & Setup Instructions
 
 ### Prerequisites
-Make sure Node.js (v18+ recommended) is installed on your machine.
+- Node.js (v18+)
+- XAMPP with MySQL server running on `localhost:3306`
 
-### Installation & Run
+### 1. Database Setup (XAMPP)
+Start XAMPP Control Panel and ensure **MySQL module** is running.
 
-1. Clone the repository:
+### 2. Backend Installation & Start
+
+1. Navigate to backend directory:
    ```bash
-   git clone https://github.com/Lalitpanchole/task_manament.git
+   cd backend
    ```
 
-2. Navigate into the project directory:
-   ```bash
-   cd FigmaProject
-   ```
-
-3. Install dependencies:
+2. Install backend dependencies:
    ```bash
    npm install
    ```
 
-4. Start the development server:
+3. Configure environment variables in `backend/.env`:
+   ```env
+   PORT=4000
+   NODE_ENV=development
+   FRONTEND_URL=http://localhost:3000
+   DATABASE_URL="mysql://root:@localhost:3306/ablespace_db"
+   JWT_SECRET=ablespace_super_secret_jwt_key_2026
+   JWT_EXPIRATION=7d
+   ```
+
+4. Run Prisma database migration:
+   ```bash
+   npx prisma db push
+   ```
+
+5. Seed MySQL database with assessment dataset:
+   ```bash
+   npx prisma db seed
+   ```
+
+6. Start NestJS backend in development mode:
+   ```bash
+   npm run start:dev
+   ```
+   - Server running at: `http://localhost:4000/api`
+   - Swagger OpenAPI Docs: `http://localhost:4000/api/docs`
+
+### 3. Frontend Installation & Start
+
+1. In root directory:
+   ```bash
+   npm install
+   ```
+
+2. Start Next.js development server:
    ```bash
    npm run dev
    ```
-
-5. Open your browser and navigate to:
-   ```
-   http://localhost:3000
-   ```
+   - Frontend running at: `http://localhost:3000`
 
 ---
 
-## 7. Production Build
+## 6. Testing & Quality Assurance
 
-To verify and create an optimized production build:
+### Automated Testing
+- **NestJS Unit Tests**:
+  ```bash
+  cd backend
+  npm run test
+  ```
+  *Result*: 2 Test Suites Passed, 4 Tests Passed (HealthController & AuthService specs).
 
-```bash
-npm run build
-```
+- **Production Build Verification**:
+  ```bash
+  # Frontend Build
+  npm run build
 
-To run the production server locally:
+  # Backend Build
+  cd backend
+  npm run build
+  ```
+  *Result*: 0 TypeScript errors, 0 build errors.
 
-```bash
-npm start
-```
-
-> **Build Verification**: The project build has been verified with `npm run build` and compiles cleanly with **0 TypeScript errors** and **0 build errors**.
-
----
-
-## 8. Responsive Design
-
-The application layout has been tested across major viewport breakpoints:
-
-- **Desktop** (1440px+)
-- **Tablet** (768px - 1024px)
-- **Mobile** (375px - 430px)
-
-### Responsive Features:
-- Mobile drawer navigation triggered via hamburger menu
-- Horizontal scrolling for Kanban board columns on mobile devices
-- Stacking layout for Task Details side panel on narrow screens
-- Responsive tables and dropdown popovers
-- Zero accidental horizontal page overflow
+### Manual & E2E Verification
+- ✅ **Database Connectivity**: MySQL `ablespace_db` created and schema synchronized via Prisma.
+- ✅ **Seed Data**: Users (Dexter, Admin, QA, Designer, Security, CN, Abhay), Projects, Tasks, Subtasks, and Comments loaded into MySQL.
+- ✅ **Auth Workflow**: Guest Login & Google Simulated OAuth issuing valid JWT bearer tokens.
+- ✅ **Task CRUD**: Creating, editing status/priority, toggling subtasks, posting comments, and creating audit activity logs persisted in MySQL.
+- ✅ **Projects & Filtering**: Multi-level filter options and project-scoped task routes reading live from backend.
+- ✅ **Swagger UI**: Verified interactive API testing interface at `http://localhost:4000/api/docs`.
 
 ---
 
-## 9. Figma Design
+## 7. Assessment Note
 
-This project is built directly from the provided **AbleSpace Technical Assessment** Figma design specification (`AbleSpace_Figma_Task_Management_Full_Flow.pdf`), matching all 14 reference screens for layout, spacing, typography, colors, borders, cards, tables, dropdowns, and theme controls.
-
-Figma Reference: `<FIGMA_REFERENCE_URL>`
-
----
-
-## 10. Frontend-Only Architecture
-
-### Current Flow Architecture:
-```
-Next.js Frontend (App Router)
-         ↓
-  React Components
-         ↓
-React Context (Auth, Task, Theme)
-         ↓
-  Browser localStorage
-```
-
-### Current Status:
-There is currently **NO**:
-- NestJS backend service
-- Database (MongoDB, PostgreSQL, or SQLite)
-- Real OAuth provider
-- REST / GraphQL endpoints
-
-All actions operate using local state and persistent `localStorage`.
-
----
-
-## 11. Testing & QA
-
-Comprehensive runtime QA was conducted on the implemented frontend:
-
-- ✅ Guest Login & Google simulated OAuth flow
-- ✅ Kanban Board column rendering & card creation
-- ✅ Grouped List View & dynamic column visibility toggling
-- ✅ Task CRUD, status updates, priority shifts, and subtask management
-- ✅ Comments feed and audit timeline log updates
-- ✅ Date picker calendar popover
-- ✅ Real-time title search filtering
-- ✅ Multi-level nested filter menu on Projects
-- ✅ Light / Dark theme switching and 6 accent color modes
-- ✅ Profile settings update and Leave Workspace confirmation modal
-- ✅ LocalStorage state persistence across refreshes
-- ✅ Desktop, Tablet, and Mobile responsive layout verification
-- ✅ **0 console errors** and **0 hydration warnings**
-
----
-
-## 12. Known Limitations
-
-- **Frontend Only**: No backend server or API routes are attached in this phase.
-- **Simulated Auth**: Google login is simulated for demonstration without external OAuth client IDs.
-- **Local Storage**: Data changes are persisted locally within the user's browser session.
-
----
-
-## 13. Future Backend Integration
-
-Planned future backend integration includes:
-- **NestJS Server**: RESTful APIs for authentication, tasks, projects, members, and audit logs.
-- **Database**: Database persistence (e.g. PostgreSQL / MongoDB with Prisma / TypeORM).
-- **Authentication**: Real Google OAuth 2.0 integration with JWT session management.
-
----
-
-## 14. Live Demo & Repository
-
-- **Live Demo**: `<YOUR_LIVE_DEPLOYMENT_URL>`
-- **GitHub Repository**: `https://github.com/Lalitpanchole/task_manament.git`
-
----
-
-## 15. AI Usage
-
-AI tools were used during development as permitted by the assessment instructions.
-
-AI assistance was utilized for:
-- Initial project scaffolding & architectural guidance
-- Figma screenshot visual alignment & layout implementation
-- Component refactoring and TypeScript typing
-- Runtime QA verification & documentation generation
-
-The code and user flows were thoroughly reviewed, debugged, and verified through runtime testing.
-
----
-
-## 16. Assessment Note
-
-This project was developed as part of the **AbleSpace Full Stack Developer (Fresher)** technical assessment.
+This project was developed for the **AbleSpace Technical Assessment**, delivering a complete Next.js frontend integrated with a NestJS & MySQL backend service.
