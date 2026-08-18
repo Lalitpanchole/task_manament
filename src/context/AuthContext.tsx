@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types/user';
 import { INITIAL_USER } from '../lib/initialData';
-import { authApi, usersApi, getAuthToken } from '../lib/api';
+import { authApi, usersApi, getAuthToken, setAuthToken } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -29,22 +29,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const backendUser = await authApi.getMe();
           setUser(backendUser);
         } catch (e) {
-          // Token invalid or backend unreachable, fallback to guest login
-          try {
-            const guestUser = await authApi.loginAsGuest();
-            setUser(guestUser);
-          } catch {
-            setUser(INITIAL_USER);
-          }
+          setAuthToken(null);
+          setUser(null);
         }
       } else {
-        // Automatically create guest session via API if no token
-        try {
-          const guestUser = await authApi.loginAsGuest();
-          setUser(guestUser);
-        } catch (e) {
-          setUser(INITIAL_USER);
-        }
+        setUser(null);
       }
       setIsLoading(false);
     }
@@ -59,6 +48,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(guestUser);
     } catch (e) {
       console.error('Guest login API failed:', e);
+      // Fallback guest user if API fails
+      setUser({ ...INITIAL_USER, isAuthenticated: true });
     } finally {
       setIsLoading(false);
     }
@@ -71,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(googleUser);
     } catch (e) {
       console.error('Google login API failed:', e);
+      setUser({ ...INITIAL_USER, userType: 'google', isAuthenticated: true });
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user?.isAuthenticated,
+        isAuthenticated: !!user,
         isLoading,
         loginAsGuest,
         loginWithGoogle,

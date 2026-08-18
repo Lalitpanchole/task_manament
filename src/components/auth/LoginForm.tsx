@@ -10,20 +10,28 @@ export const LoginForm: React.FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
-  const handleGuest = () => {
+  const handleGuest = async () => {
     setLoading('guest');
-    setTimeout(() => {
-      loginAsGuest();
+    try {
+      await loginAsGuest();
       router.push('/tasks');
-    }, 400);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(null);
+    }
   };
 
-  const handleGoogle = () => {
+  const handleGoogle = async () => {
     setLoading('google');
-    setTimeout(() => {
-      loginWithGoogle();
+    try {
+      await loginWithGoogle();
       router.push('/tasks');
-    }, 500);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(null);
+    }
   };
 
   return (
