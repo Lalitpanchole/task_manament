@@ -4,12 +4,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { Sun, Moon, Palette, Settings, ChevronRight, Check } from 'lucide-react';
+import { Sun, Moon, Palette, Settings, ChevronRight, Check, LogOut } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
 import { ColorAccentMode } from '../../types/theme';
 
 export const ProfileMenu: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { theme, setTheme, colorMode, setColorMode } = useTheme();
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -143,6 +143,21 @@ export const ProfileMenu: React.FC<{ isOpen: boolean; onClose: () => void }> = (
           <Settings className="w-4 h-4 text-slate-500" />
           <span>Settings</span>
         </button>
+
+        {/* Logout Option */}
+        <div className="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800">
+          <button
+            onClick={async () => {
+              onClose();
+              await logout();
+              router.push('/');
+            }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors font-medium text-left"
+          >
+            <LogOut className="w-4 h-4 text-rose-500" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
     </div>
   );

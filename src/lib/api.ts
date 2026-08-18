@@ -54,10 +54,10 @@ export const authApi = {
     return res.user;
   },
 
-  loginWithGoogle: async () => {
+  loginWithGoogle: async (params?: { email?: string; name?: string; avatar?: string }) => {
     const res = await apiFetch<{ user: any; token: string }>('/auth/google', {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify(params || {}),
     });
     setAuthToken(res.token);
     return res.user;

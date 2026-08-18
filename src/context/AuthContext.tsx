@@ -10,7 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   loginAsGuest: () => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: (params?: { email?: string; name?: string; avatar?: string }) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
 }
@@ -55,14 +55,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (params?: { email?: string; name?: string; avatar?: string }) => {
     setIsLoading(true);
     try {
-      const googleUser = await authApi.loginWithGoogle();
+      const googleUser = await authApi.loginWithGoogle(params);
       setUser(googleUser);
     } catch (e) {
       console.error('Google login API failed:', e);
-      setUser({ ...INITIAL_USER, userType: 'google', isAuthenticated: true });
+      setUser({
+        ...INITIAL_USER,
+        email: params?.email || INITIAL_USER.email,
+        name: params?.name || INITIAL_USER.name,
+        avatar: params?.avatar || INITIAL_USER.avatar,
+        userType: 'google',
+        isAuthenticated: true,
+      });
     } finally {
       setIsLoading(false);
     }
