@@ -45,6 +45,7 @@ export const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState<string | null>(null);
   const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
   const [customEmail, setCustomEmail] = useState('');
+  const [customName, setCustomName] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
 
   const handleGuest = async () => {
@@ -75,12 +76,14 @@ export const LoginForm: React.FC = () => {
   const handleCustomGoogleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customEmail.trim()) return;
-    const name = customEmail.split('@')[0];
-    const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+    const rawName = customEmail.split('@')[0];
+    const formattedName = customName.trim() || rawName.split(/[._-]/).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(formattedName)}&background=6366f1&color=fff&bold=true`;
+
     await handleSelectGoogleAccount({
       email: customEmail.trim(),
-      name: capitalizedName,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+      name: formattedName,
+      avatar: avatarUrl,
     });
   };
 
@@ -257,32 +260,58 @@ export const LoginForm: React.FC = () => {
               <span>Use another Google email account</span>
             </button>
           ) : (
-            <form onSubmit={handleCustomGoogleSubmit} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Enter your Google Email:
-              </label>
-              <input
-                type="email"
-                required
-                value={customEmail}
-                onChange={(e) => setCustomEmail(e.target.value)}
-                placeholder="name@gmail.com"
-                className="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
-              />
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={!customEmail.trim() || !!loading}
-                  className="flex-1 py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
-                >
-                  Continue with this Email
-                </button>
+            <form onSubmit={handleCustomGoogleSubmit} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3 text-left">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold text-slate-900 dark:text-white">
+                  Connect Real Google Account
+                </label>
                 <button
                   type="button"
                   onClick={() => setShowCustomInput(false)}
-                  className="px-3 py-2 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 >
-                  Cancel
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  Google Email Address *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={customEmail}
+                  onChange={(e) => setCustomEmail(e.target.value)}
+                  placeholder="e.g. lalitpanchole8@gmail.com"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  Display Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  placeholder="e.g. Lalit Panchole"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100"
+                />
+              </div>
+
+              <div className="pt-1 flex gap-2">
+                <button
+                  type="submit"
+                  disabled={!customEmail.trim() || !!loading}
+                  className="flex-1 py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {loading === customEmail.trim() ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <span>Sign in & Open Dashboard</span>
+                  )}
                 </button>
               </div>
             </form>
