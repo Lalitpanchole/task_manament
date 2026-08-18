@@ -1,27 +1,22 @@
-'use client';
+import React from 'react';
+import { DedicatedTaskDetailsClient } from '../../../components/tasks/DedicatedTaskDetailsClient';
 
-import React, { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { AppShell } from '../../../components/layout/AppShell';
-import { useTask } from '../../../context/TaskContext';
-import { TaskBoardView } from '../../../components/tasks/TaskBoardView';
-import { TaskListView } from '../../../components/tasks/TaskListView';
+export function generateStaticParams() {
+  return [
+    { id: 'task-1' },
+    { id: 'task-2' },
+    { id: 'task-3' },
+    { id: 'task-4' },
+    { id: 'task-5' },
+    { id: 'task-6' },
+    { id: 'task-7' },
+    { id: 'task-8' },
+    { id: 'task-9' },
+    { id: 'task-10' },
+    { id: 'task-11' }
+  ];
+}
 
 export default function DedicatedTaskDetailsPage() {
-  const params = useParams();
-  const router = useRouter();
-  const taskId = params?.id as string;
-  const { setSelectedTaskId, taskView } = useTask();
-
-  useEffect(() => {
-    if (taskId) {
-      setSelectedTaskId(taskId);
-    }
-  }, [taskId, setSelectedTaskId]);
-
-  return (
-    <AppShell title="Tasks">
-      {taskView === 'board' ? <TaskBoardView /> : <TaskListView />}
-    </AppShell>
-  );
+  return <DedicatedTaskDetailsClient />;
 }

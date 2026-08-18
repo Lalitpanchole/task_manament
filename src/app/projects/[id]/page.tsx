@@ -1,23 +1,14 @@
-'use client';
-
 import React from 'react';
-import { useParams } from 'next/navigation';
-import { AppShell } from '../../../components/layout/AppShell';
-import { useTask } from '../../../context/TaskContext';
-import { TaskBoardView } from '../../../components/tasks/TaskBoardView';
-import { TaskListView } from '../../../components/tasks/TaskListView';
+import { ProjectTaskDetailClient } from '../../../components/projects/ProjectTaskDetailClient';
+
+export function generateStaticParams() {
+  return [
+    { id: 'proj-1' },
+    { id: 'proj-2' },
+    { id: 'proj-3' }
+  ];
+}
 
 export default function ProjectTaskDetailPage() {
-  const params = useParams();
-  const projectId = params?.id as string;
-  const { projects, taskView } = useTask();
-
-  const project = projects.find((p) => p.id === projectId);
-  const projectName = project ? project.name : 'Project Details';
-
-  return (
-    <AppShell title={projectName} breadcrumb="Projects">
-      {taskView === 'board' ? <TaskBoardView /> : <TaskListView />}
-    </AppShell>
-  );
+  return <ProjectTaskDetailClient />;
 }
