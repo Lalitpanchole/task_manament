@@ -16,6 +16,7 @@ export const Sidebar: React.FC = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const navItems = [
+    { name: 'Home', href: '/', icon: LayoutGrid },
     { name: 'Tasks', href: '/tasks', icon: LayoutGrid },
     { name: 'Projects', href: '/projects', icon: Folder },
   ];
@@ -50,7 +51,7 @@ export const Sidebar: React.FC = () => {
           <nav className="space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname.startsWith(item.href);
+              const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.name}
