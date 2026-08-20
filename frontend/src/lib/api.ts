@@ -1,4 +1,11 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://ablespace-backend-tpjw.onrender.com/api';
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const TOKEN_KEY = 'ablespace_auth_token';
 
@@ -27,7 +34,8 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
   // Add 8-second timeout so deployed app doesn't hang indefinitely if Render backend is sleeping/down
   const controller = new AbortController();

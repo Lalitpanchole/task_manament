@@ -11,7 +11,9 @@ services:
       - key: PORT
         value: 10000
       - key: DATABASE_URL
-        value: file:./dev.db
+        sync: false
+      - key: FRONTEND_URL
+        value: https://pyrami.netlify.app
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRATION
