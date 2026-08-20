@@ -3,7 +3,7 @@
   publish = "frontend/out"
 
 [build.environment]
-  NEXT_PUBLIC_API_URL = "https://ablespace-backend-tpjw.onrender.com/api"
+  NEXT_PUBLIC_API_URL = "https://task-manament.vercel.app/api"
 
 [[redirects]]
   from = "/*"

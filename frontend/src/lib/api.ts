@@ -1,6 +1,6 @@
 const getApiBaseUrl = (): string => {
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return 'https://ablespace-backend-tpjw.onrender.com/api';
+    return 'https://task-manament.vercel.app/api';
   }
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 };
