@@ -40,9 +40,9 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-  // Add 8-second timeout so deployed app doesn't hang indefinitely if Render backend is sleeping/down
+  // Add 3-second timeout for fast connection checking
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 3000);
 
   try {
     const res = await fetch(url, {
