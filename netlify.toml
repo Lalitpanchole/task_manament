@@ -2,9 +2,6 @@
   command = "npm run build --prefix frontend"
   publish = "frontend/out"
 
-[build.environment]
-  NEXT_PUBLIC_API_URL = "http://localhost:4000/api"
-
 [[redirects]]
   from = "/*"
   to = "/index.html"

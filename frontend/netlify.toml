@@ -2,9 +2,6 @@
   command = "npm run build"
   publish = "out"
 
-[build.environment]
-  NEXT_PUBLIC_API_URL = "https://ablespace-backend-tpjw.onrender.com/api"
-
 [[redirects]]
   from = "/*"
   to = "/index.html"
