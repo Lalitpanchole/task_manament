@@ -14,6 +14,7 @@ export const Sidebar: React.FC = () => {
   const { user } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const profileButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const navItems = [
     { name: 'Tasks', href: '/tasks', icon: LayoutGrid },
@@ -25,6 +26,7 @@ export const Sidebar: React.FC = () => {
       {/* Workspace Header Selector */}
       <div className="relative mb-6">
         <button
+          ref={profileButtonRef}
           onClick={() => setIsProfileOpen(!isProfileOpen)}
           className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-colors"
         >
@@ -38,7 +40,7 @@ export const Sidebar: React.FC = () => {
         </button>
 
         {/* Profile Dropdown Menu */}
-        <ProfileMenu isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+        <ProfileMenu isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} anchorRef={profileButtonRef} />
       </div>
 
       {/* Workspace Navigation Links */}

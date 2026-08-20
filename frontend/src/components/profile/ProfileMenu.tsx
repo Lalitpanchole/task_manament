@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,17 +9,48 @@ import { Sun, Moon, Palette, Settings, ChevronDown, Check, LogOut } from 'lucide
 import { Avatar } from '../ui/Avatar';
 import { ColorAccentMode } from '../../types/theme';
 
-export const ProfileMenu: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+interface ProfileMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  anchorRef?: React.RefObject<HTMLButtonElement | null>;
+}
+
+export const ProfileMenu: React.FC<ProfileMenuProps> = ({ isOpen, onClose, anchorRef }) => {
   const { user, logout } = useAuth();
   const { theme, setTheme, colorMode, setColorMode } = useTheme();
   const router = useRouter();
-  const menuRef = useRef<HTMLDivElement>(null);
 
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [coords, setCoords] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [activeSubmenu, setActiveSubmenu] = useState<'none' | 'theme' | 'color'>('none');
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && anchorRef?.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      const leftPos = Math.min(
+        Math.max(12, rect.left),
+        window.innerWidth - 300
+      );
+      setCoords({
+        top: rect.bottom + 8,
+        left: leftPos,
+      });
+    }
+  }, [isOpen, anchorRef]);
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        anchorRef?.current &&
+        !anchorRef.current.contains(e.target as Node)
+      ) {
         onClose();
       }
     };
@@ -26,9 +58,9 @@ export const ProfileMenu: React.FC<{ isOpen: boolean; onClose: () => void }> = (
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, anchorRef]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const colorOptions: { key: ColorAccentMode; label: string; bg: string }[] = [
     { key: 'amber', label: 'Amber', bg: 'bg-amber-500' },
@@ -39,10 +71,16 @@ export const ProfileMenu: React.FC<{ isOpen: boolean; onClose: () => void }> = (
     { key: 'black', label: 'Black', bg: 'bg-slate-900 dark:bg-slate-100' },
   ];
 
-  return (
+  const menuContent = (
     <div
       ref={menuRef}
-      className="absolute top-full left-0 mt-2 z-[9999] w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/90 dark:border-slate-800 p-2.5 text-sm ring-1 ring-slate-900/10 dark:ring-slate-100/10 animate-in fade-in zoom-in-95"
+      style={{
+        position: 'fixed',
+        top: `${coords.top}px`,
+        left: `${coords.left}px`,
+        zIndex: 99999,
+      }}
+      className="w-72 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 text-sm ring-1 ring-slate-900/10 dark:ring-slate-100/10 animate-in fade-in zoom-in-95"
     >
       {/* Profile Header */}
       <div className="flex flex-col items-center p-3 mb-2 border-b border-slate-100 dark:border-slate-800 text-center">
@@ -175,5 +213,7 @@ export const ProfileMenu: React.FC<{ isOpen: boolean; onClose: () => void }> = (
       </div>
     </div>
   );
+
+  return createPortal(menuContent, document.body);
 };
 
