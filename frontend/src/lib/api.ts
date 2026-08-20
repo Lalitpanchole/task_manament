@@ -29,19 +29,34 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
 
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-  const res = await fetch(url, {
-    ...options,
-    headers,
-  });
+  // Add 8-second timeout so deployed app doesn't hang indefinitely if Render backend is sleeping/down
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-  const json = await res.json().catch(() => ({}));
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
 
-  if (!res.ok) {
-    const errorMsg = json.message || `Request failed with status ${res.status}`;
-    throw new Error(errorMsg);
+    clearTimeout(timeoutId);
+
+    const json = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      const errorMsg = json.message || `Request failed with status ${res.status}`;
+      throw new Error(errorMsg);
+    }
+
+    return json.data !== undefined ? json.data : json;
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('API request timed out (Backend server is offline or sleeping)');
+    }
+    throw error;
   }
-
-  return json.data !== undefined ? json.data : json;
 }
 
 export const authApi = {
