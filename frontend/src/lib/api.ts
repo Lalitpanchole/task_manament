@@ -1,5 +1,5 @@
 export function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || 'https://task-manament.vercel.app/api';
+  return 'https://task-manament.vercel.app/api';
 }
 
 
