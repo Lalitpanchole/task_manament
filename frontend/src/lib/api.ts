@@ -1,5 +1,11 @@
 export function getApiBaseUrl(): string {
-  return 'https://task-manament.vercel.app/api';
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return 'https://task-manament.vercel.app/api';
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 }
 
 
