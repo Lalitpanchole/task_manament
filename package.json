@@ -19,6 +19,9 @@
     "db:studio": "npx prisma studio --schema backend/prisma/schema.prisma"
   },
   "dependencies": {
-    "next": "^16.0.0"
+    "next": "^16.0.0",
+    "@prisma/client": "^5.10.0",
+    "prisma": "^5.10.0",
+    "@nestjs/cli": "^10.3.0"
   }
 }
