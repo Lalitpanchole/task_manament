@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Task, TaskStatus, TaskPriority, Member, Subtask } from '../types/task';
+import { Task, TaskStatus, TaskPriority, Member, Subtask, TaskComment } from '../types/task';
 import { Project } from '../types/project';
 import { TaskViewMode, FieldPreferences, ProjectFilterOptions } from '../types/theme';
 import { INITIAL_TASKS, INITIAL_PROJECTS, INITIAL_MEMBERS } from '../lib/initialData';
@@ -165,21 +165,21 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
     try {
-      const updated = await tasksApi.updateTask(id, updates);
-      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      await tasksApi.updateTask(id, updates);
     } catch (e) {
-      console.error(`Failed to update task ${id} via API:`, e);
+      console.warn(`Backend offline - updated task ${id} in local state:`, e);
     }
   };
 
   const deleteTask = async (id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    if (selectedTaskId === id) setSelectedTaskId(null);
     try {
       await tasksApi.deleteTask(id);
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-      if (selectedTaskId === id) setSelectedTaskId(null);
     } catch (e) {
-      console.error(`Failed to delete task ${id} via API:`, e);
+      console.warn(`Backend offline - deleted task ${id} in local state:`, e);
     }
   };
 
@@ -196,102 +196,170 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addSubtask = async (taskId: string, title: string) => {
+    const newSubtask: Subtask = {
+      id: 'sub-' + Date.now(),
+      title,
+      completed: false,
+      priority: 'Medium',
+    };
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, subtasks: [...t.subtasks, newSubtask] } : t)),
+    );
     try {
       await subtasksApi.createSubtask(taskId, title);
-      const updatedTask = await tasksApi.getTaskById(taskId);
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
     } catch (e) {
-      console.error('Failed to add subtask:', e);
+      console.warn('Backend offline - added subtask in local state:', e);
     }
   };
 
   const toggleSubtask = async (taskId: string, subtaskId: string) => {
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        return {
+          ...t,
+          subtasks: t.subtasks.map((s) => (s.id === subtaskId ? { ...s, completed: !s.completed } : s)),
+        };
+      }),
+    );
     const task = tasks.find((t) => t.id === taskId);
     const subtask = task?.subtasks.find((s) => s.id === subtaskId);
-    if (!subtask) return;
-
-    try {
-      await subtasksApi.updateSubtask(subtaskId, { completed: !subtask.completed });
-      const updatedTask = await tasksApi.getTaskById(taskId);
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
-    } catch (e) {
-      console.error('Failed to toggle subtask:', e);
+    if (subtask) {
+      try {
+        await subtasksApi.updateSubtask(subtaskId, { completed: !subtask.completed });
+      } catch (e) {
+        console.warn('Backend offline - toggled subtask in local state:', e);
+      }
     }
   };
 
   const deleteSubtask = async (taskId: string, subtaskId: string) => {
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        return {
+          ...t,
+          subtasks: t.subtasks.filter((s) => s.id !== subtaskId),
+        };
+      }),
+    );
     try {
       await subtasksApi.deleteSubtask(subtaskId);
-      const updatedTask = await tasksApi.getTaskById(taskId);
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
     } catch (e) {
-      console.error('Failed to delete subtask:', e);
+      console.warn('Backend offline - deleted subtask in local state:', e);
     }
   };
 
   const addComment = async (taskId: string, content: string) => {
     if (!content.trim()) return;
+    const newComment: TaskComment = {
+      id: 'comment-' + Date.now(),
+      authorName: 'Dexter',
+      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+      content,
+      createdAt: 'Just now',
+    };
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, comments: [...t.comments, newComment] } : t)),
+    );
     try {
       await commentsApi.addComment(taskId, content);
-      const updatedTask = await tasksApi.getTaskById(taskId);
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
     } catch (e) {
-      console.error('Failed to add comment:', e);
+      console.warn('Backend offline - added comment in local state:', e);
     }
   };
 
   const addResource = async (taskId: string, title: string, url: string) => {
+    const newResource = {
+      id: 'res-' + Date.now(),
+      title,
+      url,
+    };
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, resources: [...t.resources, newResource] } : t)),
+    );
     try {
-      const updatedTask = await tasksApi.addResource(taskId, title, url);
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
+      await tasksApi.addResource(taskId, title, url);
     } catch (e) {
-      console.error('Failed to add resource:', e);
+      console.warn('Backend offline - added resource in local state:', e);
     }
   };
 
   const toggleMemberOnTask = async (taskId: string, memberId: string) => {
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const exists = t.memberIds.includes(memberId);
+        return {
+          ...t,
+          memberIds: exists ? t.memberIds.filter((m) => m !== memberId) : [...t.memberIds, memberId],
+        };
+      }),
+    );
     try {
-      const updatedTask = await tasksApi.toggleMember(taskId, memberId);
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
+      await tasksApi.toggleMember(taskId, memberId);
     } catch (e) {
-      console.error('Failed to toggle member:', e);
+      console.warn('Backend offline - toggled member in local state:', e);
     }
   };
 
   const toggleLabelOnTask = async (taskId: string, label: string) => {
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const exists = t.labels.includes(label);
+        return {
+          ...t,
+          labels: exists ? t.labels.filter((l) => l !== label) : [...t.labels, label],
+        };
+      }),
+    );
     try {
-      const updatedTask = await tasksApi.toggleLabel(taskId, label);
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
+      await tasksApi.toggleLabel(taskId, label);
     } catch (e) {
-      console.error('Failed to toggle label:', e);
+      console.warn('Backend offline - toggled label in local state:', e);
     }
   };
 
   // Project Actions
   const addProject = async (projectData: Partial<Project>) => {
+    const newProj: Project = {
+      id: 'proj-' + Date.now(),
+      name: projectData.name || 'New Project',
+      description: projectData.description || '',
+      priority: projectData.priority || 'Medium',
+      leadId: projectData.leadId || 'user-1',
+      dueDate: projectData.dueDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+      status: (projectData.status as any) || 'Active',
+      taskCount: 0,
+    };
+    setProjects((prev) => [...prev, newProj]);
+
     try {
-      const newProj = await projectsApi.createProject(projectData);
-      setProjects((prev) => [...prev, newProj]);
+      const serverProj = await projectsApi.createProject(projectData);
+      if (serverProj?.id) {
+        setProjects((prev) => prev.map((p) => (p.id === newProj.id ? serverProj : p)));
+      }
     } catch (e) {
-      console.error('Failed to add project:', e);
+      console.warn('Backend offline - added project in local state:', e);
     }
   };
 
   const updateProject = async (id: string, updates: Partial<Project>) => {
+    setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
     try {
-      const updated = await projectsApi.updateProject(id, updates);
-      setProjects((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      await projectsApi.updateProject(id, updates);
     } catch (e) {
-      console.error('Failed to update project:', e);
+      console.warn('Backend offline - updated project in local state:', e);
     }
   };
 
   const deleteProject = async (id: string) => {
+    setProjects((prev) => prev.filter((p) => p.id !== id));
     try {
       await projectsApi.deleteProject(id);
-      setProjects((prev) => prev.filter((p) => p.id !== id));
     } catch (e) {
-      console.error('Failed to delete project:', e);
+      console.warn('Backend offline - deleted project in local state:', e);
     }
   };
 
