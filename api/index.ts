@@ -1,3 +1,4 @@
+// Vercel deployment rebuild trigger for Aiven Cloud MySQL sync
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../backend/src/app.module';
