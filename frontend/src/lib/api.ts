@@ -1,11 +1,13 @@
-const getApiBaseUrl = (): string => {
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return 'https://task-manament.vercel.app/api';
+export function getApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return 'https://task-manament.vercel.app/api';
+    }
   }
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-};
+}
 
-const API_BASE_URL = getApiBaseUrl();
 
 const TOKEN_KEY = 'ablespace_auth_token';
 
