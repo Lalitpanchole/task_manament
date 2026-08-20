@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
+// Production Vercel deployment sync trigger
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
