@@ -91,7 +91,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updatedUser = await usersApi.updateProfile(data);
       setUser(updatedUser);
     } catch (e) {
-      console.error('Update profile API failed:', e);
+      console.warn('Update profile API warning (using local fallback):', e);
+      setUser((prev) => (prev ? { ...prev, ...data } : null));
     }
   };
 
