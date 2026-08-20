@@ -14,19 +14,20 @@ export const Sidebar: React.FC = () => {
   const { user } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const profileButtonRef = React.useRef<HTMLButtonElement>(null);
+  const desktopButtonRef = React.useRef<HTMLButtonElement>(null);
+  const mobileButtonRef = React.useRef<HTMLButtonElement>(null);
 
   const navItems = [
     { name: 'Tasks', href: '/tasks', icon: LayoutGrid },
     { name: 'Projects', href: '/projects', icon: Folder },
   ];
 
-  const content = (
+  const renderContent = (btnRef: React.RefObject<HTMLButtonElement | null>) => (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 w-64 p-4">
       {/* Workspace Header Selector */}
       <div className="relative mb-6">
         <button
-          ref={profileButtonRef}
+          ref={btnRef}
           onClick={() => setIsProfileOpen(!isProfileOpen)}
           className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-colors"
         >
@@ -38,9 +39,6 @@ export const Sidebar: React.FC = () => {
           </div>
           <ChevronDown className="w-4 h-4 text-slate-400" />
         </button>
-
-        {/* Profile Dropdown Menu */}
-        <ProfileMenu isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} anchorRef={profileButtonRef} />
       </div>
 
       {/* Workspace Navigation Links */}
@@ -107,15 +105,22 @@ export const Sidebar: React.FC = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            {content}
+            {renderContent(mobileButtonRef)}
           </div>
         </div>
       )}
 
       {/* Desktop Persistent Sidebar */}
       <aside className="hidden lg:block shrink-0 h-screen sticky top-0 z-40">
-        {content}
+        {renderContent(desktopButtonRef)}
       </aside>
+
+      {/* Global Portal Profile Menu */}
+      <ProfileMenu
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        anchorRef={isMobileOpen ? mobileButtonRef : desktopButtonRef}
+      />
     </>
   );
 };

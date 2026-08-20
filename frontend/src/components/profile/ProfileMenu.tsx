@@ -80,7 +80,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({ isOpen, onClose, ancho
         left: `${coords.left}px`,
         zIndex: 99999,
       }}
-      className="w-72 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 text-sm ring-1 ring-slate-900/10 dark:ring-slate-100/10 animate-in fade-in zoom-in-95"
+      className="w-56 max-w-[calc(100vw-1.5rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-3 text-sm ring-1 ring-slate-900/10 dark:ring-slate-100/10 animate-in fade-in zoom-in-95"
     >
       {/* Profile Header */}
       <div className="flex flex-col items-center p-3 mb-2 border-b border-slate-100 dark:border-slate-800 text-center">
