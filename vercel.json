@@ -1,5 +1,9 @@
 {
-  "buildCommand": "npm run build --prefix backend",
-  "outputDirectory": "backend/dist",
-  "framework": null
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    }
+  ]
 }
