@@ -6,24 +6,21 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
-    let dbUrl = process.env.DATABASE_URL;
+    const dummyUrl = 'mysql://dummy:dummy@localhost:3306/dummy';
+    let dbUrl = process.env.DATABASE_URL || dummyUrl;
 
     if (dbUrl && process.env.DB_SSL === 'true' && !dbUrl.includes('sslmode=')) {
       const separator = dbUrl.includes('?') ? '&' : '?';
       dbUrl = `${dbUrl}${separator}sslmode=require`;
     }
 
-    super(
-      dbUrl
-        ? {
-            datasources: {
-              db: {
-                url: dbUrl,
-              },
-            },
-          }
-        : undefined,
-    );
+    super({
+      datasources: {
+        db: {
+          url: dbUrl,
+        },
+      },
+    });
   }
 
   async onModuleInit() {
