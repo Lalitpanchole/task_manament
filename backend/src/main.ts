@@ -12,7 +12,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Enable CORS
-  const frontendUrl = process.env.FRONTEND_URL || 'https://task-manament.vercel.app';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://pyrami.netlify.app';
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
@@ -59,7 +59,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT || 4000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`🚀 NestJS Backend running at http://localhost:${port}/api`);
   console.log(`📚 Swagger Documentation available at http://localhost:${port}/api/docs`);
 }
