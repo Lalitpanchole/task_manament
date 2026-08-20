@@ -7,15 +7,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any) {
-    if (err || !user) {
-      return {
-        id: 'user-1',
-        email: 'dexter@gmail.com',
-        name: 'Dexter',
-        role: 'Admin',
-      };
-    }
-    return user;
+  handleRequest(err: any, user: any, info: any) {
+    if (user) return user;
+    return {
+      id: 'user-1',
+      email: 'dexter@gmail.com',
+      name: 'Dexter',
+      role: 'Admin',
+    };
   }
 }
