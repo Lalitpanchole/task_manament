@@ -131,11 +131,31 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Task Actions
   const addTask = async (taskData: Partial<Task>) => {
+    const tempId = `task-${Date.now()}`;
+    const newTask: Task = {
+      id: tempId,
+      title: taskData.title || 'Untitled Task',
+      description: taskData.description || '',
+      status: taskData.status || 'To Do',
+      priority: taskData.priority || 'Medium',
+      startDate: taskData.startDate || new Date().toISOString(),
+      dueDate: taskData.dueDate || new Date().toISOString(),
+      projectId: taskData.projectId || 'proj-1',
+      reporterId: 'user-1',
+      memberIds: taskData.memberIds || ['user-1'],
+      labels: taskData.labels || ['Design'],
+      subtasks: [],
+      comments: [],
+      resources: [],
+      updates: [],
+    };
+
     try {
       const createdTask = await tasksApi.createTask(taskData);
-      setTasks((prev) => [createdTask, ...prev]);
+      setTasks((prev) => [createdTask || newTask, ...prev]);
     } catch (e) {
-      console.error('Failed to create task via API:', e);
+      console.warn('Failed to create task via API (using local state fallback):', e);
+      setTasks((prev) => [newTask, ...prev]);
     }
   };
 
