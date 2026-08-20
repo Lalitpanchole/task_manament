@@ -4,9 +4,14 @@ export function getApiBaseUrl(): string {
     if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
       return 'https://task-manament.vercel.app/api';
     }
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://task-manament.vercel.app/api';
   }
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 }
+
 
 
 const TOKEN_KEY = 'ablespace_auth_token';
