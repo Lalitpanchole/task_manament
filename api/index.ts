@@ -1,4 +1,7 @@
-// Vercel deployment rebuild trigger for Aiven Cloud MySQL sync
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'mysql://root:password@127.0.0.1:3306/defaultdb?sslmode=require';
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../backend/src/app.module';
