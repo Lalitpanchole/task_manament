@@ -6,7 +6,7 @@ import { Project } from '../types/project';
 import { TaskViewMode, FieldPreferences, ProjectFilterOptions } from '../types/theme';
 import { INITIAL_TASKS, INITIAL_PROJECTS, INITIAL_MEMBERS } from '../lib/initialData';
 import { getStorageItem, setStorageItem } from '../lib/storage';
-import { tasksApi, projectsApi, usersApi, subtasksApi, commentsApi } from '../lib/api';
+import { tasksApi, projectsApi, usersApi, subtasksApi, commentsApi, getAuthToken } from '../lib/api';
 import { useAuth } from './AuthContext';
 
 interface TaskContextType {
@@ -80,6 +80,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load backend data
   const refreshData = useCallback(async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
     try {
       setIsLoading(true);
       const [fetchedTasks, fetchedProjects, fetchedUsers] = await Promise.all([
