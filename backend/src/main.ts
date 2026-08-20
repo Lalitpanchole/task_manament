@@ -12,14 +12,17 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Enable CORS
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://task-manament.vercel.app';
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
+      const cleanFrontendUrl = frontendUrl.replace(/\/$/, '');
+      const cleanOrigin = origin.replace(/\/$/, '');
       if (
-        origin === frontendUrl ||
+        cleanOrigin === cleanFrontendUrl ||
         origin.includes('localhost') ||
         origin.includes('127.0.0.1') ||
+        origin.endsWith('.vercel.app') ||
         origin.endsWith('.netlify.app') ||
         origin.endsWith('.onrender.com')
       ) {

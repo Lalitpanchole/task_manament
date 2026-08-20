@@ -57,47 +57,47 @@ export const ProfileSettingsForm: React.FC = () => {
       {/* Main Profile Form Card */}
       <form onSubmit={handleSave} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-6 shadow-2xs text-xs">
         {/* Profile Picture */}
-        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-slate-100 dark:border-slate-800">
           <span className="font-semibold text-slate-700 dark:text-slate-300">Profile picture</span>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <Avatar src={avatarUrl} name={name} size="lg" />
             <input
               type="text"
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               placeholder="Avatar image URL"
-              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-60"
+              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs flex-1 sm:w-64 max-w-full"
             />
           </div>
         </div>
 
         {/* Email Field */}
-        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-slate-100 dark:border-slate-800">
           <span className="font-semibold text-slate-700 dark:text-slate-300">Email</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-60"
+              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-full sm:w-64"
             />
-            <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+            <Edit2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           </div>
         </div>
 
         {/* Full Name */}
-        <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-slate-100 dark:border-slate-800">
           <span className="font-semibold text-slate-700 dark:text-slate-300">Full name</span>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-60"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-full sm:w-64"
           />
         </div>
 
         {/* Title / Role */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-2 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-slate-100 dark:border-slate-800">
           <div>
             <span className="font-semibold text-slate-700 dark:text-slate-300 block">Title</span>
             <span className="text-[10px] text-slate-400">Your job title or role</span>
@@ -106,12 +106,12 @@ export const ProfileSettingsForm: React.FC = () => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-60"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-full sm:w-64"
           />
         </div>
 
         {/* Username */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3">
           <div>
             <span className="font-semibold text-slate-700 dark:text-slate-300 block">Username</span>
             <span className="text-[10px] text-slate-400">One word, like a nickname or first name</span>
@@ -120,7 +120,7 @@ export const ProfileSettingsForm: React.FC = () => {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-60"
+            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs w-full sm:w-64"
           />
         </div>
 

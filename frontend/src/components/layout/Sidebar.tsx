@@ -111,7 +111,7 @@ export const Sidebar: React.FC = () => {
       )}
 
       {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:block shrink-0 h-screen sticky top-0">
+      <aside className="hidden lg:block shrink-0 h-screen sticky top-0 z-40">
         {content}
       </aside>
     </>

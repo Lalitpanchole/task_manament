@@ -42,7 +42,7 @@ export const ProfileMenu: React.FC<{ isOpen: boolean; onClose: () => void }> = (
   return (
     <div
       ref={menuRef}
-      className="absolute top-14 left-0 z-50 w-64 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 text-sm animate-in fade-in zoom-in-95"
+      className="absolute top-full left-0 mt-2 z-[9999] w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/90 dark:border-slate-800 p-2.5 text-sm ring-1 ring-slate-900/10 dark:ring-slate-100/10 animate-in fade-in zoom-in-95"
     >
       {/* Profile Header */}
       <div className="flex flex-col items-center p-3 mb-2 border-b border-slate-100 dark:border-slate-800 text-center">
